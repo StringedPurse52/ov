@@ -1,4 +1,7 @@
-
+load "Int";
+load "Bool";
+load "Char";
+load "ListPair";
 structure AbSyn =
 struct
 
