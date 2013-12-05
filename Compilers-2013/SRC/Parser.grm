@@ -21,7 +21,6 @@
 %token <Pos> TLParen TRParen TLCurly TRCurly TLBracket TRBracket
 %token <int, Pos> TNLit
 %token <bool, Pos> TBLit
-%token <char, Pos> TChar
 %token <string, Pos> TSLit
 
 %start Prog
@@ -38,9 +37,10 @@
 %type <AbSyn.StmtBlock> StmtBlock
 %type <AbSyn.FunDec> FunDec
 %type <AbSyn.Prog> Prog
+
 %%
 
-(* Program Structure *)
+/* Program Structure */
 
 Prog : TProgram TId TSemi FunDecs TEOF { $3 }
 
@@ -61,7 +61,7 @@ SBlock : TBegin StmtSeq TSemi TEnd { $2 }
 StmtSeq : StmtSeq TSemi Stmt { $1 @ [ $3 ] }
         | Stmt               { [ $1 ] }
 
-(* Variable and Parameter Declarations, Types *)
+/* Variable and Parameter Declarations, Types */
 
 PDecl : Params { $1 }
       |        { [] }
@@ -79,7 +79,7 @@ Type : TInt            { (Int, $1) }
 	 | TBool           { (Bool, $1) }
 	 | TArray TOf Type { Array ($3, $1)}
 
-(* Statements *)
+/* Statements */
 
 Stmt : TId TLParen CallParams TRParen  { ProcCall (#1 $1, $3, #2 $1) }
      | TIf Exp TThen Block             { IfThEl ($2, $4, ([], []), #2 $1) }
@@ -88,7 +88,7 @@ Stmt : TId TLParen CallParams TRParen  { ProcCall (#1 $1, $3, #2 $1) }
 	 | TReturn Ret                     { Return ($2, $1) }
 	 | LVal TAssign Exp                { Assign ($1, $3, $1) }
 
-(* Function and Procedure Parameters and Index Lists *)
+/* Function and Procedure Parameters and Index Lists */
 
 CallParams : Exps { $1 }
            |      { [] }
@@ -96,7 +96,7 @@ CallParams : Exps { $1 }
 Exps : Exp TComma Exps { $1 : $3 }
      | Exp             { [ $1 ] }
 
-(* L-Values and Expressions *)
+/* L-Values and Expressions */
 
 LVal : TId                          { (Var (#1 $1), #2 $1) }
      | TId TLBracket Exps TRBracket { (Index (#1 $1, $3), #2 $1) }
