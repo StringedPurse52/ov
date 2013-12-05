@@ -14,10 +14,30 @@
 %token <Pos> TWhile TDo
 %token <Pos> TArray
 %token <Pos> TOr TAnd TNot
-%token <Pos> TVar TOf TChar TBool TInt
-%token <int, Pos> TBLit 
+%token <Pos> TVar TOf TChar TBool TInt 
+%token <Pos> TSemi TColon TComma TAssign
+%token <Pos> TPlus TMinus TTimes TSlash 
+%token <Pos> TEq TLess
+%token <Pos> TLParen TRParen TLCurly TRCurly TLBracket TRBracket
+%token <int, Pos> TNLit
+%token <bool, Pos> TBLit
+%token <char, Pos> TChar
+%token <string, Pos> TSLit
 
 %start Prog
+
+%type <AbSyn.Pos> Pos
+%type <AbSyn.Ident> Ident
+%type <AbSyn.BasicVal> BasicVal
+%type <AbSyn.Value> Value
+%type <AbSyn.Type> Type
+%type <AbSyn.Exp> Exp
+%type <AbSyn.Dec> Dec
+%type <AbSyn.LVal> LVal
+%type <AbSyn.Stmt> Stmt
+%type <AbSyn.StmtBlock> StmtBlock
+%type <AbSyn.FunDec> FunDec
+%type <AbSyn.Prog> Prog
 %%
 
 (* Program Structure *)
