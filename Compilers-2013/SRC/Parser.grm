@@ -47,8 +47,8 @@ Prog : TProgram TId TSemi FunDecs TEOF { $3 }
 FunDecs : FunDecs FunDec { $2 : $1 }
         | FunDec         { [ $1 ] }
 
-FunDec : TFunction TId TLParen PDecl TRParen TColon Type Block TSemi { AbSyn.Func ($7, $2, $4, $8, $1) }
-       | TProcedure TId TLParen PDecl TRParen Block TSemi            { AbSyn.Proc ($2, $4, $6, $1) }
+FunDec : TFunction TId TLParen PDecl TRParen TColon Type Block TSemi { AbSyn.Func ($7, #1 $2, $4, $8, $1) }
+       | TProcedure TId TLParen PDecl TRParen Block TSemi            { AbSyn.Proc (#1 $2, $4, $6, $1) }
 
 Block : DBlock SBlock { AbSyn.Block ($1, $2) }
 
@@ -58,8 +58,8 @@ DBlock : TVar Decs { $2 }
 SBlock : TBegin StmtSeq TSemi TEnd { $2 }
        | Stmt                      { $1 }
 
-StmtSeq : StmtSeq TSemi Stmt 
-        | Stmt
+StmtSeq : StmtSeq TSemi Stmt { $1 @ [ $3 ] }
+        | Stmt               { [ $1 ] }
 
 (* Variable and Parameter Declarations, Types *)
 
@@ -94,7 +94,7 @@ CallParams : Exps { $1 }
            |      { [] }
 
 Exps : Exp TComma Exps { $1 : $3 }
-     | Exp             { $1 }
+     | Exp             { [ $1 ] }
 
 (* L-Values and Expressions *)
 
@@ -104,16 +104,16 @@ LVal : TId                          { (Var (#1 $1), #2 $1) }
 Ret : Exp { $1 }
     |     { [] }
 
-Exp : NumLit                         { }
-    | LogicLit                       { }
-	| CharLit                        { }
-	| StringLit                      { }
-	| TLBracket Exps TRBracket       { }
+Exp : TNLit                          { Literal $1 }
+    | TBLit                          { Literal $1 }
+	| TCLit                          { Literal $1 }
+	| TSLit                          { StrLit $1 }
+	| TLBracket Exps TRBracket       { ArrLit $1 }
 	| LVal                           { LValue $1 }
 	| TNot Exp                       { Not ($2, $1) }
 	| Exp OP Exp                     { (#1 $2) ($1, $3, #2 $2) }
-	| TLParen Exp TRParen            { }
-	| TId TLParen CallParams TRParen { }
+	| TLParen Exp TRParen            { $2 }
+	| TId TLParen CallParams TRParen { FunApp (#1 $1, $3, #2 $1) }
 
 OP : TPlus  { (Plus, $1)  }
    | TMinus { (Minus, $1) }
