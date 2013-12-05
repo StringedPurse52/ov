@@ -22,19 +22,22 @@
 %token <int, Pos> TNLit
 %token <bool, Pos> TBLit
 %token <string, Pos> TSLit
+%token <char, Pos> TCLit
 
 %start Prog
 
-%type <AbSyn.Pos> Pos
-%type <AbSyn.Ident> Ident
-%type <AbSyn.BasicVal> BasicVal
-%type <AbSyn.Value> Value
+%type <(AbSyn.Exp * AbSyn.Exp * AbSyn.Pos -> Exp, Pos)> OP
+%type <AbSyn.Return> Ret
 %type <AbSyn.Type> Type
+%type <AbSyn.Exp list> CallParams Exps
 %type <AbSyn.Exp> Exp
 %type <AbSyn.Dec> Dec
 %type <AbSyn.LVal> LVal
 %type <AbSyn.Stmt> Stmt
-%type <AbSyn.StmtBlock> StmtBlock
+%type <AbSyn.Stmt list> SBlock StmtSeq
+%type <AbSyn.Dec list> PDecl Params DBlock Decs
+%type <AbSyn.StmtBlock> Block
+%type <AbSyn.FunDec list> FunDecs
 %type <AbSyn.FunDec> FunDec
 %type <AbSyn.Prog> Prog
 
