@@ -7,11 +7,17 @@
 %}
 
 %token <Pos> TProgram TEOF
-%token <Pos> TFunction TProcedure
+%token <Pos> TFunction TProcedure TReturn
 %token <string, Pos> TId
+%token <Pos> TBegin TEnd
+%token <Pos> TIf TThen TElse
+%token <Pos> TWhile TDo
+%token <Pos> TArray
+%token <Pos> TOr TAnd TNot
+%token <Pos> TVar TOf TChar TBool TInt
+%token <int, Pos> TBLit 
 
 %start Prog
-
 %%
 
 (* Program Structure *)
