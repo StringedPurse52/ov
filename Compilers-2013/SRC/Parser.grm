@@ -41,6 +41,11 @@
 %type <AbSyn.FunDec> FunDec
 %type <AbSyn.Prog> Prog
 
+%left TOr og TNot
+%left TEq TLess
+%left TPlus TMinus
+%left TTimes TSlash
+
 %%
 
 /* Program Structure */
@@ -111,7 +116,7 @@ Exp : TNLit                          { Literal $1 }
     | TBLit                          { Literal $1 }
 	| TCLit                          { Literal $1 }
 	| TSLit                          { StrLit $1 }
-	| TLBracket Exps TRBracket       { ArrLit $1 }
+	| TLCurly Exps TRCurly           { ArrLit $1 }
 	| LVal                           { LValue $1 }
 	| TNot Exp                       { Not ($2, $1) }
 	| Exp OP Exp                     { (#1 $2) ($1, $3, #2 $2) }
