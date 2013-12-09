@@ -1,36 +1,34 @@
 %{
 (* SML header, after data types *)
 
-  open AbSyn
-
-  fun 
+  open AbSyn;
+  
 %}
 
-%token <Pos> TProgram TEOF
-%token <Pos> TFunction TProcedure TReturn
-%token <string, Pos> TId
-%token <Pos> TBegin TEnd
-%token <Pos> TIf TThen TElse
-%token <Pos> TWhile TDo
-%token <Pos> TArray
-%token <Pos> TOr TAnd TNot
-%token <Pos> TVar TOf TChar TBool TInt 
-%token <Pos> TSemi TColon TComma TAssign
-%token <Pos> TPlus TMinus TTimes TSlash 
-%token <Pos> TEq TLess
-%token <Pos> TLParen TRParen TLCurly TRCurly TLBracket TRBracket
-%token <int, Pos> TNLit
-%token <bool, Pos> TBLit
-%token <string, Pos> TSLit
-%token <char, Pos> TCLit
+%token <AbSyn.Pos> TProgram TEOF
+%token <AbSyn.Pos> TFunction TProcedure TReturn
+%token <string * AbSyn.Pos> TId
+%token <AbSyn.Pos> TBegin TEnd
+%token <AbSyn.Pos> TIf TThen TElse
+%token <AbSyn.Pos> TWhile TDo
+%token <AbSyn.Pos> TArray
+%token <AbSyn.Pos> TOr TAnd TNot
+%token <AbSyn.Pos> TVar TOf TChar TBool TInt 
+%token <AbSyn.Pos> TSemi TColon TComma TAssign
+%token <AbSyn.Pos> TPlus TMinus TTimes TSlash 
+%token <AbSyn.Pos> TEq TLess
+%token <AbSyn.Pos> TLParen TRParen TLCurly TRCurly TLBracket TRBracket
+%token <int * AbSyn.Pos> TNLit
+%token <bool * AbSyn.Pos> TBLit
+%token <string * AbSyn.Pos> TSLit
+%token <char * AbSyn.Pos> TCLit
 
 %start Prog
 
-%type <(AbSyn.Exp * AbSyn.Exp * AbSyn.Pos -> Exp, Pos)> OP
 %type <AbSyn.Return> Ret
 %type <AbSyn.Type> Type
 %type <AbSyn.Exp list> CallParams Exps
-%type <AbSyn.Exp> Exp
+%type <AbSyn.Exp> Exp OP
 %type <AbSyn.Dec> Dec
 %type <AbSyn.LVal> LVal
 %type <AbSyn.Stmt> Stmt
@@ -51,10 +49,10 @@
 
 /* Program Structure */
 
-Prog : TProgram TId TSemi FunDecs TEOF { $3 }
+Prog : TProgram TId TSemi FunDecs TEOF { $4 }
 
-FunDecs : FunDecs FunDec { $2 : $1 }
-        | FunDec         { [ $1 ] }
+FunDecs : FunDecs FunDec { $1 @ [$2] }
+        | FunDec         { [$1] }
 
 FunDec : TFunction TId TLParen PDecl TRParen TColon Type Block TSemi { AbSyn.Func ($7, #1 $2, $4, $8, $1) }
        | TProcedure TId TLParen PDecl TRParen Block TSemi            { AbSyn.Proc (#1 $2, $4, $6, $1) }
@@ -66,21 +64,21 @@ DBlock : TVar Decs { $2 }
 
 SBlock : TBegin StmtSeq TSemi TEnd { $2 }
 
-StmtSeq : StmtSeq TSemi Stmt { $1 @ [ $3 ] }
-        | Stmt               { [ $1 ] }
+StmtSeq : StmtSeq TSemi Stmt { $1 @ [$3] }
+        | Stmt               { [$1] }
 
 /* Variable and Parameter Declarations, Types */
 
 PDecl : Params { $1 }
       |        { [] }
 
-Params : Params TSemi Dec { $3 : $1 }
-       | Dec              { $1 }
+Params : Params TSemi Dec { $1 @ [$3] }
+       | Dec              { [$1] }
 
 Dec : TId TColon Type { AbSyn.Dec (#1 $1, $3, #2 $1) }
 
-Decs : Decs Dec TColon { $2 : $1 }
-     | Dec TColon      { $1 }
+Decs : Decs Dec TColon { $1 @ [$2] }
+     | Dec TColon      { [$1] }
 
 Type : TInt            { (Int, $1) }
      | TChar           { (Char, $1) }
@@ -101,8 +99,8 @@ Stmt : TId TLParen CallParams TRParen  { ProcCall (#1 $1, $3, #2 $1) }
 CallParams : Exps { $1 }
            |      { [] }
 
-Exps : Exp TComma Exps { $1 : $3 }
-     | Exp             { [ $1 ] }
+Exps : Exp TComma Exps { $1 :: $3 }
+     | Exp             { [$1] }
 
 /* L-Values and Expressions */
 
@@ -123,14 +121,14 @@ Exp : TNLit                          { Literal $1 }
 	| TLParen Exp TRParen            { $2 }
 	| TId TLParen CallParams TRParen { AbSyn.FunApp (#1 $1, $3, #2 $1) }
 
-OP : Exp TPlus Exp  { AbSyn.Plus $1 $3   }
-   | Exp TMinus Exp { AbSyn.Minus $1 $3  }
-   | Exp TTimes Exp { AbSyn.Times $1 $3  }
-   | Exp TSlash Exp { AbSyn.Div $1 $3    }
-   | Exp TEq Exp    { AbSyn.Equal $1 $3  }
-   | Exp TLess Exp  { AbSyn.Less $1 $3   }
-   | Exp TAnd Exp   { AbSyn.And $1 $3    }
-   | Exp TOr Exp    { AbSyn.Or $1 $3     }
+OP : Exp TPlus Exp  { AbSyn.Plus $1 $3  }
+   | Exp TMinus Exp { AbSyn.Minus $1 $3 }
+   | Exp TTimes Exp { AbSyn.Times $1 $3 }
+   | Exp TSlash Exp { AbSyn.Div $1 $3   }
+   | Exp TEq Exp    { AbSyn.Equal $1 $3 }
+   | Exp TLess Exp  { AbSyn.Less $1 $3  }
+   | Exp TAnd Exp   { AbSyn.And $1 $3   }
+   | Exp TOr Exp    { AbSyn.Or $1 $3    }
 
 %%
 
