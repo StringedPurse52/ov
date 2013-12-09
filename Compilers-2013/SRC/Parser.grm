@@ -3,7 +3,6 @@
 
   open AbSyn
 
-  fun 
 %}
 
 %token <Pos> TProgram TEOF
@@ -52,7 +51,7 @@
 
 Prog : TProgram TId TSemi FunDecs TEOF { $3 }
 
-FunDecs : FunDecs FunDec { $2 : $1 }
+FunDecs : FunDec FunDecs { $1 : $2 }
         | FunDec         { [ $1 ] }
 
 FunDec : TFunction TId TLParen PDecl TRParen TColon Type Block TSemi { AbSyn.Func ($7, #1 $2, $4, $8, $1) }
@@ -66,7 +65,7 @@ DBlock : TVar Decs { $2 }
 SBlock : TBegin StmtSeq TSemi TEnd { $2 }
        | Stmt                      { $1 }
 
-StmtSeq : StmtSeq TSemi Stmt { $1 @ [ $3 ] }
+StmtSeq : Stmt TSemi StmtSeq { $1 : $3 }
         | Stmt               { [ $1 ] }
 
 /* Variable and Parameter Declarations, Types */
@@ -74,13 +73,13 @@ StmtSeq : StmtSeq TSemi Stmt { $1 @ [ $3 ] }
 PDecl : Params { $1 }
       |        { [] }
 
-Params : Params TSemi Dec { $3 : $1 }
-       | Dec              { $1 }
+Params : Dec TSemi Params { $1 : $3 }
+       | Dec              { [ $1 ] }
 
 Dec : TId TColon Type { AbSyn.Dec (#1 $1, $3, #2 $1) }
 
-Decs : Decs Dec TColon { $2 : $1 }
-     | Dec TColon      { $1 }
+Decs : Dec TColon Decs { $1 : $3 }
+     | Dec TColon      { [ $1 ] }
 
 Type : TInt            { (Int, $1) }
      | TChar           { (Char, $1) }
