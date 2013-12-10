@@ -300,9 +300,17 @@
 Our parser for the Paladim programming language is implemented. 
 While our implementation works for the specified grammar, 
 we had to change some of the grammar slightly in order to 
-prevent a shift/reduce conflict. An example of this would be 
-SBlock -> Stmt.
-
+prevent a shift/reduce conflict. A consequence of this would be that, 
+instead of writing
+\begin{lstlisting}
+If <expr> Then <Statement>;
+\end{lstlisting} 
+We must write 
+\begin{lstlisting}
+If <expr> Then begin <Statement>; end;
+\end{lstlisting}
+else the parser won't parse the program correctly. For our final 
+group assignment, we will have this fixed.
 \subsection{Integer Multiplication and Division, and Boolean Operators}
 
 Will be included in milestone
